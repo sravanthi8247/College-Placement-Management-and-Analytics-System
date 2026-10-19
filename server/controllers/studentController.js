@@ -5,7 +5,7 @@ import Student from '../models/Student.js';
 import Company from '../models/Company.js';
 import Placement from '../models/Placement.js';
 import Application from '../models/Application.js';
-import { findStudentForUser } from '../utils/studentProfile.js';
+import { findStudentForUser, ensureStudentProfile } from '../utils/studentProfile.js';
 import {
   generateTemplate,
   parseSpreadsheetBuffer,
@@ -169,11 +169,11 @@ export const getStudents = async (req, res) => {
       const limitNum = Math.max(1, parseInt(limit, 10) || 25);
       const skip = (pageNum - 1) * limitNum;
 
-      const [students, total, totalPlaced, totalNotPlaced, distinctBranches] = await Promise.all([
+      const [students, total, totalAllStudents, totalPlaced, distinctBranches] = await Promise.all([
         Student.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limitNum),
         Student.countDocuments(filter),
+        Student.countDocuments({}),
         Student.countDocuments({ placementStatus: 'Placed' }),
-        Student.countDocuments({ placementStatus: { $ne: 'Placed' } }),
         Student.distinct('branch'),
       ]);
 
@@ -184,9 +184,9 @@ export const getStudents = async (req, res) => {
         totalPages: Math.max(1, Math.ceil(total / limitNum)),
         limit: limitNum,
         stats: {
-          totalStudents: totalPlaced + totalNotPlaced,
+          totalStudents: totalAllStudents,
           placedCount: totalPlaced,
-          notPlacedCount: totalNotPlaced,
+          notPlacedCount: Math.max(0, totalAllStudents - totalPlaced),
         },
         branches: distinctBranches.filter(Boolean).sort(),
       });
@@ -206,7 +206,11 @@ export const getStudents = async (req, res) => {
 
 export const getMyStudentProfile = async (req, res) => {
   try {
-    const student = await findStudentForUser(req.user);
+    let student = await findStudentForUser(req.user);
+
+    if (!student && req.user?.role === 'student') {
+      student = await ensureStudentProfile(req.user);
+    }
 
     if (!student) {
       return res.status(404).json({
@@ -222,7 +226,11 @@ export const getMyStudentProfile = async (req, res) => {
 
 export const updateMyStudentProfile = async (req, res) => {
   try {
-    const student = await findStudentForUser(req.user);
+    let student = await findStudentForUser(req.user);
+
+    if (!student && req.user?.role === 'student') {
+      student = await ensureStudentProfile(req.user);
+    }
 
     if (!student) {
       return res.status(404).json({

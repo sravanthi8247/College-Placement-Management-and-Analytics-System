@@ -29,7 +29,13 @@ function PlacementForm({
         getStudents(),
         getCompanies(),
       ]);
-      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setStudents(
+        Array.isArray(studentsData)
+          ? studentsData
+          : Array.isArray(studentsData?.students)
+          ? studentsData.students
+          : []
+      );
       setCompanies(Array.isArray(companiesData) ? companiesData : []);
     } catch (error) {
       setErrorMessage("Unable to load students or companies.");

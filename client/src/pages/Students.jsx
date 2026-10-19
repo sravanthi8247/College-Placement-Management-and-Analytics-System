@@ -19,7 +19,8 @@ function Students() {
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Filters & Search
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [branchFilter, setBranchFilter] = useState("All");
   const [yearFilter, setYearFilter] = useState("All");
@@ -30,6 +31,7 @@ function Students() {
   const [limit, setLimit] = useState(25);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [isServerPaginated, setIsServerPaginated] = useState(true);
   const [globalStats, setGlobalStats] = useState({
     totalStudents: 0,
     placedCount: 0,
@@ -37,8 +39,18 @@ function Students() {
   });
   const [branchesList, setBranchesList] = useState([]);
 
-  const searchTimeoutRef = useRef(null);
   const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const fetchStudents = useCallback(
     async () => {
@@ -50,7 +62,7 @@ function Students() {
           page,
           limit,
         };
-        if (search.trim()) params.search = search.trim();
+        if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
         if (statusFilter !== "All") params.status = statusFilter;
         if (branchFilter !== "All") params.branch = branchFilter;
         if (yearFilter !== "All") params.year = yearFilter;
@@ -59,6 +71,7 @@ function Students() {
         const data = await getStudents(params);
 
         if (data && typeof data === "object" && Array.isArray(data.students)) {
+          setIsServerPaginated(true);
           setStudents(data.students);
           setTotalRecords(data.total || 0);
           setTotalPages(data.totalPages || 1);
@@ -69,9 +82,39 @@ function Students() {
             setBranchesList(data.branches);
           }
         } else if (Array.isArray(data)) {
-          setStudents(data);
-          setTotalRecords(data.length);
-          setTotalPages(Math.max(1, Math.ceil(data.length / limit)));
+          setIsServerPaginated(false);
+          let filtered = data;
+          if (debouncedSearch.trim()) {
+            const q = debouncedSearch.trim().toLowerCase();
+            filtered = filtered.filter((s) =>
+              [s.name, s.rollNo, s.email, s.branch].some((val) =>
+                String(val || "").toLowerCase().includes(q)
+              )
+            );
+          }
+          if (statusFilter !== "All") {
+            filtered = filtered.filter((s) => s.placementStatus === statusFilter);
+          }
+          if (branchFilter !== "All") {
+            filtered = filtered.filter(
+              (s) => String(s.branch).toLowerCase() === branchFilter.toLowerCase()
+            );
+          }
+          if (yearFilter !== "All") {
+            filtered = filtered.filter((s) => Number(s.year) === Number(yearFilter));
+          }
+          if (minCgpa !== "") {
+            filtered = filtered.filter((s) => Number(s.cgpa) >= Number(minCgpa));
+          }
+
+          setStudents(filtered);
+          setTotalRecords(filtered.length);
+          setTotalPages(Math.max(1, Math.ceil(filtered.length / limit)));
+          setGlobalStats({
+            totalStudents: data.length,
+            placedCount: data.filter((s) => s.placementStatus === "Placed").length,
+            notPlacedCount: data.filter((s) => s.placementStatus !== "Placed").length,
+          });
         }
       } catch (err) {
         console.error("Error fetching students:", err);
@@ -80,25 +123,12 @@ function Students() {
         setLoading(false);
       }
     },
-    [page, limit, search, statusFilter, branchFilter, yearFilter, minCgpa]
+    [page, limit, debouncedSearch, statusFilter, branchFilter, yearFilter, minCgpa]
   );
 
   useEffect(() => {
     fetchStudents();
-  }, [page, limit, statusFilter, branchFilter, yearFilter, minCgpa, location.key, fetchStudents]);
-
-  const handleSearchChange = (event) => {
-    const val = event.target.value;
-    setSearch(val);
-    setPage(1); // Reset to page 1 on search change
-
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    searchTimeoutRef.current = setTimeout(() => {
-      fetchStudents();
-    }, 250);
-  };
+  }, [fetchStudents, location.key]);
 
   const handleFilterChange = (setter) => (event) => {
     setter(event.target.value);
@@ -153,6 +183,11 @@ function Students() {
   // Pagination boundaries
   const startRecord = totalRecords === 0 ? 0 : (page - 1) * limit + 1;
   const endRecord = Math.min(page * limit, totalRecords);
+
+  // Compute displayed students (respecting page & limit whether paginated on server or client)
+  const displayedStudents = isServerPaginated
+    ? students
+    : students.slice((page - 1) * limit, page * limit);
 
   const branches = branchesList.length > 0 ? branchesList : [
     ...new Set(
@@ -290,8 +325,11 @@ function Students() {
                 type="search"
                 aria-label="Search students"
                 placeholder="Search by name, roll no, email or branch..."
-                value={search}
-                onChange={handleSearchChange}
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setPage(1);
+                }}
               />
             </div>
 
@@ -369,7 +407,7 @@ function Students() {
                   </thead>
 
                   <tbody>
-                    {students.length === 0 ? (
+                    {displayedStudents.length === 0 ? (
                       <tr>
                         <td
                           colSpan={isAdmin ? 8 : 7}
@@ -383,7 +421,7 @@ function Students() {
                         </td>
                       </tr>
                     ) : (
-                      students.map((student) => (
+                      displayedStudents.map((student) => (
                         <tr key={student._id}>
                           <td>
                             <div className="students-person">
