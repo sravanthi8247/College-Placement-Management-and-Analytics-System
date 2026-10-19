@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { addPlacement } from "../services/placementService";
 import { getStudents } from "../services/studentService";
 import { getCompanies } from "../services/companyService";
+import StudentSearchSelector from "./StudentSearchSelector";
+import "./CompanyForm.css";
 
 function PlacementForm({
   onPlacementAdded,
@@ -10,6 +12,8 @@ function PlacementForm({
 }) {
   const [students, setStudents] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     student: "",
@@ -19,26 +23,33 @@ function PlacementForm({
     status: "Pending",
   });
 
+  const loadData = async () => {
+    try {
+      const [studentsData, companiesData] = await Promise.all([
+        getStudents(),
+        getCompanies(),
+      ]);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setCompanies(Array.isArray(companiesData) ? companiesData : []);
+    } catch (error) {
+      setErrorMessage("Unable to load students or companies.");
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    const studentsData = await getStudents();
-    const companiesData = await getCompanies();
-
-    setStudents(studentsData);
-    setCompanies(companiesData);
-  };
-
   useEffect(() => {
     if (selectedPlacement) {
       setFormData({
-        student: selectedPlacement.student._id,
-        company: selectedPlacement.company._id,
-        placementDate: selectedPlacement.placementDate.substring(0, 10),
-        packageOffered: selectedPlacement.packageOffered,
-        status: selectedPlacement.status,
+        student: selectedPlacement.student?._id || selectedPlacement.student || "",
+        company: selectedPlacement.company?._id || selectedPlacement.company || "",
+        placementDate: selectedPlacement.placementDate
+          ? String(selectedPlacement.placementDate).substring(0, 10)
+          : "",
+        packageOffered: selectedPlacement.packageOffered ?? "",
+        status: selectedPlacement.status || "Pending",
       });
     } else {
       setFormData({
@@ -60,14 +71,41 @@ function PlacementForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+
+    if (!formData.student || !String(formData.student).trim()) {
+      setErrorMessage("Please select a student.");
+      return;
+    }
+
+    if (!formData.company || !String(formData.company).trim()) {
+      setErrorMessage("Please select a company.");
+      return;
+    }
+
+    if (!formData.placementDate) {
+      setErrorMessage("Please provide a placement date.");
+      return;
+    }
+
+    if (formData.packageOffered === "" || formData.packageOffered === undefined) {
+      setErrorMessage("Please enter the package offered.");
+      return;
+    }
+
+    const packageValue = Number(formData.packageOffered);
+    if (Number.isNaN(packageValue) || packageValue < 0) {
+      setErrorMessage("Package cannot be negative.");
+      return;
+    }
+
+    setSaving(true);
 
     try {
       if (selectedPlacement) {
         await onUpdatePlacement(formData);
-        alert("Placement Updated Successfully!");
       } else {
         await addPlacement(formData);
-        alert("Placement Added Successfully!");
       }
 
       setFormData({
@@ -79,73 +117,93 @@ function PlacementForm({
       });
 
       onPlacementAdded();
+      await loadData();
     } catch (error) {
-      console.error(error);
-      alert("Operation Failed");
+      setErrorMessage(
+        error.response?.data?.message || "Operation failed. Please try again."
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>{selectedPlacement ? "Edit Placement" : "Add Placement"}</h2>
+    <form className="company-drive-form" onSubmit={handleSubmit}>
+      {errorMessage && (
+        <p role="alert" className="company-drive-form__error">
+          {errorMessage}
+        </p>
+      )}
 
-      <select
-        name="student"
-        value={formData.student}
-        onChange={handleChange}
-        required
-      >
-        <option value="">Select Student</option>
-        {students.map((student) => (
-          <option key={student._id} value={student._id}>
-            {student.name}
-          </option>
-        ))}
-      </select>
+      <label>
+        Student *
+        <StudentSearchSelector
+          value={formData.student}
+          onChange={(studentId) =>
+            setFormData((prev) => ({ ...prev, student: studentId }))
+          }
+          selectedStudent={selectedPlacement?.student}
+          initialStudents={students}
+          required
+        />
+      </label>
 
-      <select
-        name="company"
-        value={formData.company}
-        onChange={handleChange}
-        required
-      >
-        <option value="">Select Company</option>
-        {companies.map((company) => (
-          <option key={company._id} value={company._id}>
-            {company.companyName}
-          </option>
-        ))}
-      </select>
+      <label>
+        Company *
+        <select
+          name="company"
+          value={formData.company}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Select Company</option>
+          {companies.map((company) => (
+            <option key={company._id} value={company._id}>
+              {company.companyName}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      <input
-        type="date"
-        name="placementDate"
-        value={formData.placementDate}
-        onChange={handleChange}
-        required
-      />
+      <label>
+        Placement date *
+        <input
+          type="date"
+          name="placementDate"
+          value={formData.placementDate}
+          onChange={handleChange}
+          required
+        />
+      </label>
 
-      <input
-        type="number"
-        name="packageOffered"
-        placeholder="Package (LPA)"
-        value={formData.packageOffered}
-        onChange={handleChange}
-        required
-      />
+      <label>
+        Package (LPA) *
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          name="packageOffered"
+          value={formData.packageOffered}
+          onChange={handleChange}
+          required
+        />
+      </label>
 
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-      >
-        <option>Pending</option>
-        <option>Selected</option>
-        <option>Rejected</option>
-      </select>
+      <label>
+        Status
+        <select name="status" value={formData.status} onChange={handleChange}>
+          <option value="Pending">Pending</option>
+          <option value="Selected">Selected</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </label>
 
-      <button type="submit">
-        {selectedPlacement ? "Update Placement" : "Save Placement"}
+      <button type="submit" disabled={saving}>
+        {saving
+          ? "Saving..."
+          : selectedPlacement
+            ? "Update Placement"
+            : "Save Placement"}
       </button>
     </form>
   );

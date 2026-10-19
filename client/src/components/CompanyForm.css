@@ -1,0 +1,62 @@
+
+.company-drive-form {
+  display: grid;
+  gap: 16px;
+}
+
+.company-drive-form h2 {
+  margin: 0;
+  color: #142747;
+}
+
+.company-drive-form label {
+  display: grid;
+  gap: 7px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.company-drive-form input,
+.company-drive-form select,
+.company-drive-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.company-drive-form select[multiple] {
+  min-height: 110px;
+}
+
+.company-drive-form small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.company-drive-form button {
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #17345f;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.company-drive-form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.company-drive-form__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 14px;
+}

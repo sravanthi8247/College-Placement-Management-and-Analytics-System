@@ -1,9 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
+
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Button from "../ui/Button";
 import { clearAuthData } from "../../services/authService";
 
 function DashboardNavbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Show the navbar only on the main dashboard
+  if (location.pathname !== "/dashboard") {
+    return null;
+  }
 
   const handleLogout = () => {
     clearAuthData();
@@ -14,8 +21,8 @@ function DashboardNavbar() {
     <header className="dashboard__header">
       <div className="container dashboard__header-inner">
         <Link to="/dashboard" className="dashboard__logo">
-          <span className="dashboard__logo-icon">SPT</span>
-          Placement Tracker
+          <span className="dashboard__logo-icon">CP</span>
+          Placement Portal
         </Link>
 
         <div className="dashboard__nav-links">

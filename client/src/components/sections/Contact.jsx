@@ -8,7 +8,7 @@ function Contact() {
           <span className="section-label">Contact</span>
           <h2 className="section-title">Get in Touch</h2>
           <p className="section-description">
-            Have questions about Student Placement Tracker? Reach out to our team and
+            Have questions about Placement Portal? Reach out to our team and
             we will help you get started.
           </p>
         </header>
@@ -18,7 +18,7 @@ function Contact() {
               📧
             </span>
             <h3 className="contact__title">Email</h3>
-            <p className="contact__detail">support@placementtracker.com</p>
+            <p className="contact__detail">support@placementportal.edu</p>
           </div>
           <div className="contact__card">
             <span className="contact__icon" aria-hidden="true">

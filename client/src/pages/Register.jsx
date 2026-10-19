@@ -5,7 +5,8 @@ import FormInput from '../components/ui/FormInput';
 import Alert from '../components/ui/Alert';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { registerUser, saveAuthData } from '../services/authService';
+import { registerUser } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import { validateRegisterForm } from '../utils/validation';
 
 const initialFormData = {
@@ -22,6 +23,7 @@ const initialFormData = {
 
 function Register() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState(initialFormData);
   const [fieldErrors, setFieldErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
@@ -61,7 +63,7 @@ function Register() {
         adminCode: formData.role === 'admin' ? formData.adminCode.trim() : undefined,
       });
 
-      saveAuthData(response.data.token, response.data.user);
+      login(response.data.token, response.data.user);
       setSuccessMessage(response.message || 'Registration successful');
 
       setTimeout(() => {
@@ -77,7 +79,7 @@ function Register() {
   };
 
   return (
-    <AuthLayout title="Create account" subtitle="Register to start tracking placements">
+    <AuthLayout title="Create account" subtitle="Register to access Placement Portal">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <Alert type="error" message={errorMessage} />
         <Alert type="success" message={successMessage} />
@@ -88,7 +90,7 @@ function Register() {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          placeholder="John Doe"
+          placeholder="Enter your full name"
           error={fieldErrors.name}
           required
           autoComplete="name"
@@ -101,7 +103,7 @@ function Register() {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="you@college.edu"
+          placeholder="you@gmail.com"
           error={fieldErrors.email}
           required
           autoComplete="email"

@@ -35,4 +35,9 @@ const placementSchema = new mongoose.Schema(
   }
 );
 
+placementSchema.index({ student: 1, company: 1 }, { unique: true });
+placementSchema.index({ student: 1 });
+placementSchema.index({ company: 1 });
+placementSchema.index({ status: 1 });
+
 export default mongoose.model("Placement", placementSchema);

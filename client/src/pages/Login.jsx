@@ -5,11 +5,13 @@ import FormInput from '../components/ui/FormInput';
 import Alert from '../components/ui/Alert';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { loginUser, saveAuthData } from '../services/authService';
+import { loginUser } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 import { validateLoginForm } from '../utils/validation';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
@@ -43,7 +45,7 @@ function Login() {
         password: formData.password,
       });
 
-      saveAuthData(response.data.token, response.data.user);
+      login(response.data.token, response.data.user);
       setSuccessMessage(response.message || 'Login successful');
 
       setTimeout(() => {
@@ -71,7 +73,7 @@ function Login() {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="you@college.edu"
+          placeholder="you@gmail.com"
           error={fieldErrors.email}
           required
           autoComplete="off"

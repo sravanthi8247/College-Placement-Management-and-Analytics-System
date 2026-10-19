@@ -1,28 +1,27 @@
-import express from "express";
-
+import express from 'express';
 import {
   addCompany,
   getCompanies,
+  getCompanyById,
   updateCompany,
   deleteCompany,
-} from "../controllers/companyController.js";
-import { protect, authorize } from "../middleware/authMiddleware.js";
+  checkCompanyEligibility,
+  checkMyEligibility,
+  getEligibleStudents,
+} from '../controllers/companyController.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// All company routes require a logged-in user
 router.use(protect);
 
-// Add Company (admin only)
-router.post("/", authorize("admin"), addCompany);
-
-// Get All Companies
-router.get("/", getCompanies);
-
-// Update Company (admin only)
-router.put("/:id", authorize("admin"), updateCompany);
-
-// Delete Company (admin only)
-router.delete("/:id", authorize("admin"), deleteCompany);
+router.get('/', getCompanies);
+router.get('/:id/eligibility/me', checkMyEligibility);
+router.get('/:id/eligibility/:studentId', checkCompanyEligibility);
+router.get('/:id/eligible-students', authorize('admin'), getEligibleStudents);
+router.get('/:id', getCompanyById);
+router.post('/', authorize('admin'), addCompany);
+router.put('/:id', authorize('admin'), updateCompany);
+router.delete('/:id', authorize('admin'), deleteCompany);
 
 export default router;

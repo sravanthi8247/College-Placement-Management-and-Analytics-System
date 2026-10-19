@@ -8,8 +8,8 @@ function Footer() {
       <div className="container footer__inner">
         <div className="footer__brand">
           <div className="footer__logo">
-            <span className="footer__logo-icon">SPT</span>
-            <span>Student Placement Tracker</span>
+            <span className="footer__logo-icon">PP</span>
+            <span>Placement Portal</span>
           </div>
           <p className="footer__tagline">
             Simplifying campus placements for colleges, coordinators, and students.
@@ -39,7 +39,7 @@ function Footer() {
 
       <div className="footer__bottom">
         <div className="container">
-          <p>&copy; {currentYear} Student Placement Tracker. All rights reserved.</p>
+          <p>&copy; {currentYear} Placement Portal. All rights reserved.</p>
         </div>
       </div>
     </footer>

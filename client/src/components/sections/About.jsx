@@ -10,7 +10,7 @@ function About() {
             Built for Modern Campus Recruitment
           </h2>
           <p className="about__text">
-            Student Placement Tracker helps educational institutions digitize their
+            Placement Portal helps educational institutions digitize their
             entire placement workflow. From registering students and publishing company
             drives to tracking interviews and publishing final results, our platform
             reduces manual effort and improves transparency.

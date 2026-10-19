@@ -20,9 +20,9 @@ function Navbar() {
       <div className="container navbar__inner">
         <a href="#home" className="navbar__logo" onClick={closeMenu}>
           <span className="navbar__logo-icon" aria-hidden="true">
-            SPT
+            PP
           </span>
-          <span className="navbar__logo-text">Placement Tracker</span>
+          <span className="navbar__logo-text">Placement Portal</span>
         </a>
 
         <button

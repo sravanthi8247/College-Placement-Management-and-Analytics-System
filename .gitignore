@@ -31,3 +31,9 @@ coverage/
 # Cache
 .cache/
 *.tsbuildinfo
+
+# Uploaded Files
+uploads/
+server/uploads/
+# Generated reports
+server/Placement_Report_*.pdf

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { ensureStudentProfile } from '../utils/studentProfile.js';
 
 const generateToken = (userId) => {
   if (!process.env.JWT_SECRET) {
@@ -107,6 +108,12 @@ export const register = async (req, res, next) => {
       role: role || 'student',
     });
 
+    try {
+      await ensureStudentProfile(user);
+    } catch (profileError) {
+      console.error('Non-fatal: ensureStudentProfile during register:', profileError.message);
+    }
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -142,6 +149,12 @@ export const login = async (req, res, next) => {
         success: false,
         message: 'Invalid email or password',
       });
+    }
+
+    try {
+      await ensureStudentProfile(user);
+    } catch (profileError) {
+      console.error('Non-fatal: ensureStudentProfile during login:', profileError.message);
     }
 
     const token = generateToken(user._id);
