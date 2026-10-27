@@ -116,8 +116,12 @@ function Placements() {
     return placements.filter((placement) => {
       const matchesSearch = [
         placement.student?.name,
+        placement.student?.rollNo,
+        placement.student?.branch,
+        placement.student?.email,
         placement.company?.companyName,
         placement.status,
+        placement.packageOffered,
       ].some((value) =>
         String(value ?? "").toLowerCase().includes(query)
       );
@@ -268,9 +272,14 @@ function Placements() {
               <input
                 type="search"
                 aria-label="Search placements"
-                placeholder="Search by student, company or status..."
+                placeholder="Search by student, roll no, branch, company or status..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                  }
+                }}
               />
             </div>
 
@@ -338,9 +347,26 @@ function Placements() {
                                 .charAt(0)
                                 .toUpperCase()}
                             </div>
-                            <strong>
-                              {placement.student?.name || "N/A"}
-                            </strong>
+                            <div>
+                              <strong>
+                                {placement.student?.name || "N/A"}
+                              </strong>
+                              {placement.student?.rollNo && (
+                                <span
+                                  style={{
+                                    display: "block",
+                                    fontSize: "12px",
+                                    color: "#64748b",
+                                    marginTop: "2px",
+                                  }}
+                                >
+                                  Roll: {placement.student.rollNo}
+                                  {placement.student.branch
+                                    ? ` • ${placement.student.branch}`
+                                    : ""}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
 

@@ -141,8 +141,8 @@ function PlacementForm({
         </p>
       )}
 
-      <label>
-        Student *
+      <div className="company-drive-form__field">
+        <span className="company-drive-form__label">Student *</span>
         <StudentSearchSelector
           value={formData.student}
           onChange={(studentId) =>
@@ -152,7 +152,7 @@ function PlacementForm({
           initialStudents={students}
           required
         />
-      </label>
+      </div>
 
       <label>
         Company *

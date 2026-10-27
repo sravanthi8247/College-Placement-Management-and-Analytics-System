@@ -1,4 +1,3 @@
-
 .company-drive-form {
   display: grid;
   gap: 16px;
@@ -9,9 +8,17 @@
   color: #142747;
 }
 
-.company-drive-form label {
+.company-drive-form label,
+.company-drive-form__field {
   display: grid;
   gap: 7px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.company-drive-form__label {
+  display: block;
   color: #334155;
   font-size: 14px;
   font-weight: 600;

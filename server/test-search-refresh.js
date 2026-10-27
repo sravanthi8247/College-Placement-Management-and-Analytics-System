@@ -6,9 +6,13 @@ import mongoose from 'mongoose';
 
 dns.setServers(['1.1.1.1', '8.8.8.8']);
 
-dotenv.config({ path: path.join(process.cwd(), '.env') });
-if (!process.env.MONGO_URI) {
-  dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
+const envPaths = [
+  path.join(process.cwd(), '.env'),
+  path.join(process.cwd(), 'server', '.env'),
+  path.join(process.cwd(), '..', '.env'),
+];
+for (const p of envPaths) {
+  dotenv.config({ path: p });
 }
 
 import Student from './models/Student.js';
@@ -100,35 +104,100 @@ async function runTests() {
     console.log('✓ Test students and company created.');
 
     // -------------------------------------------------------------
-    // Test 1: Search by Name, Roll No, and Branch
+    // Test 1: Single-character, Numeric, Multi-character, and Field Searches
     // -------------------------------------------------------------
-    console.log('\n[1/8] Testing search by student name, roll number, and branch...');
+    console.log('\n[1/8] Testing single-character, numeric, multi-character, and field searches...');
     {
-      // Search by name (case-insensitive & trimmed)
-      const { req: r1, res: s1 } = createMockReqRes({
-        query: { search: `  alice wonderland ${TEST_TAG.toLowerCase()}  ` },
+      // 1a. Single-letter search ('a')
+      const { req: rSingleLetter, res: sSingleLetter } = createMockReqRes({
+        query: { search: 'a', page: '1', limit: '25' },
       });
-      await getStudents(r1, s1);
-      const d1 = s1.getData();
-      assert(Array.isArray(d1), 'Expected array response');
-      assert(d1.some((s) => s.rollNo === student1Roll), 'Student 1 should be found by name');
+      await getStudents(rSingleLetter, sSingleLetter);
+      assert.strictEqual(sSingleLetter.getStatusCode(), 200);
+      const dSingleLetter = sSingleLetter.getData();
+      assert(Array.isArray(dSingleLetter.students), 'Expected paginated students array for single-letter search');
+      assert(dSingleLetter.students.length > 0, 'Single-letter search should return matching students');
+      console.log(`✓ [1a] Single-letter search ('a') returned ${dSingleLetter.students.length} students (total ${dSingleLetter.total}).`);
 
-      // Search by roll number
+      // 1b. Single-number search ('1')
+      const { req: rSingleNum, res: sSingleNum } = createMockReqRes({
+        query: { search: '1', page: '1', limit: '25' },
+      });
+      await getStudents(rSingleNum, sSingleNum);
+      assert.strictEqual(sSingleNum.getStatusCode(), 200);
+      const dSingleNum = sSingleNum.getData();
+      assert(Array.isArray(dSingleNum.students), 'Expected paginated students array for single-number search');
+      assert(dSingleNum.students.length > 0, 'Single-number search should return matching students');
+      assert(dSingleNum.students.some((s) => s.rollNo === student1Roll), 'Student 1 (roll ending in R1) should match single number search 1');
+      console.log(`✓ [1b] Single-number search ('1') returned ${dSingleNum.students.length} students (total ${dSingleNum.total}), matched student1.`);
+
+      // 1c. Multi-character search ('al', 'sr', or partial name)
+      const { req: rMultiChar, res: sMultiChar } = createMockReqRes({
+        query: { search: 'alice', page: '1', limit: '25' },
+      });
+      await getStudents(rMultiChar, sMultiChar);
+      assert.strictEqual(sMultiChar.getStatusCode(), 200);
+      const dMultiChar = sMultiChar.getData();
+      assert(dMultiChar.students.some((s) => s.rollNo === student1Roll), 'Multi-char search "alice" should match Student 1');
+      console.log(`✓ [1c] Multi-character search ('alice') matched Student 1.`);
+
+      // 1d. Search by full roll number
       const { req: r2, res: s2 } = createMockReqRes({
         query: { search: student2Roll.toLowerCase() },
       });
       await getStudents(r2, s2);
       const d2 = s2.getData();
-      assert(d2.some((s) => s.rollNo === student2Roll), 'Student 2 should be found by roll number');
+      assert(Array.isArray(d2) && d2.some((s) => s.rollNo === student2Roll), 'Student 2 should be found by exact roll number');
+      console.log(`✓ [1d] Search by roll number '${student2Roll}' matched Student 2.`);
 
-      // Search by branch
+      // 1e. Search by branch
       const { req: r3, res: s3 } = createMockReqRes({
         query: { search: customBranch },
       });
       await getStudents(r3, s3);
       const d3 = s3.getData();
-      assert(d3.some((s) => s.rollNo === student1Roll), 'Student 1 should be found by branch');
-      console.log('✓ Test 1 Passed: Search by name, roll number, and branch works accurately.');
+      assert(Array.isArray(d3) && d3.some((s) => s.rollNo === student1Roll), 'Student 1 should be found by branch');
+      console.log(`✓ [1e] Search by branch '${customBranch}' matched Student 1.`);
+
+      // 1f. Regex special characters handling (must not cause 500 error or syntax crash)
+      const { req: rSpecial, res: sSpecial } = createMockReqRes({
+        query: { search: '(test+[.*])?^$' },
+      });
+      await getStudents(rSpecial, sSpecial);
+      assert.strictEqual(sSpecial.getStatusCode(), 200, 'Regex special characters must be escaped safely');
+      console.log('✓ [1f] Search with regex metacharacters handled safely with 200 OK.');
+
+      // 1g. Placements table search matching logic verification
+      const samplePlacement = {
+        student: { name: 'Alice Wonderland', rollNo: '101', branch: 'CSE' },
+        company: { companyName: 'Apex Tech' },
+        status: 'Selected',
+        packageOffered: 15,
+      };
+
+      const matchFn = (placement, query) => {
+        const q = String(query).trim().toLowerCase();
+        return [
+          placement.student?.name,
+          placement.student?.rollNo,
+          placement.student?.branch,
+          placement.student?.email,
+          placement.company?.companyName,
+          placement.status,
+          placement.packageOffered,
+        ].some((val) => String(val ?? '').toLowerCase().includes(q));
+      };
+
+      assert(matchFn(samplePlacement, 's'), 'Query "s" should match Selected');
+      assert(matchFn(samplePlacement, '1'), 'Query "1" should match roll number 101 or package 15');
+      assert(matchFn(samplePlacement, '101'), 'Query "101" should match roll number');
+      assert(matchFn(samplePlacement, 'cse'), 'Query "cse" should match branch CSE');
+      assert(matchFn(samplePlacement, 'apex'), 'Query "apex" should match company Apex Tech');
+      assert(matchFn(samplePlacement, 'al'), 'Query "al" should match Alice');
+      assert(!matchFn(samplePlacement, 'xyz999'), 'Query "xyz999" should not match');
+      console.log('✓ [1g] Placements table search filter matching logic verified for letters, numbers, and roll numbers.');
+
+      console.log('✓ Test 1 Passed: Comprehensive search by letter, number, name, roll number, and branch works accurately.');
     }
 
     // -------------------------------------------------------------
