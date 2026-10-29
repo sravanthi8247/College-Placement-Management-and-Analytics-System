@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import Alert from '../components/ui/Alert';
 import {
@@ -115,10 +116,12 @@ function Profile() {
   };
 
   const handleViewResume = async () => {
+    setResumeError('');
+    setResumeMessage('');
     try {
       await openResumeInNewTab('me');
     } catch (err) {
-      setResumeError(err.response?.data?.message || 'Failed to open resume.');
+      setResumeError(err.response?.data?.message || err.message || 'Failed to open resume.');
     }
   };
 
@@ -365,6 +368,36 @@ function Profile() {
             </p>
           </div>
         )}
+      </section>
+
+      {/* Account Security & Password Management Section */}
+      <section className="students-form-panel" style={{ marginTop: 24 }}>
+        <div className="students-section-heading">
+          <div>
+            <h2>Account Security</h2>
+            <p>
+              Manage your account password and security credentials.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 18 }}>
+          <div>
+            <p style={{ fontWeight: 700, color: '#0f172a', margin: 0, fontSize: '0.95rem' }}>
+              🔒 Account Password
+            </p>
+            <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: '0.82rem' }}>
+              We recommend using a strong password that you do not use on other sites.
+            </p>
+          </div>
+          <Link
+            to="/change-password"
+            className="students-refresh"
+            style={{ textDecoration: 'none', backgroundColor: '#2563eb', color: '#ffffff', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <span>🔒</span> Change Password
+          </Link>
+        </div>
       </section>
     </AppLayout>
   );

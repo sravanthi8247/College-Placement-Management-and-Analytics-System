@@ -14,6 +14,7 @@ import DriveDetail from './pages/DriveDetail';
 import Applications from './pages/Applications';
 import Reports from './pages/Reports';
 import BulkImportStudents from './pages/BulkImportStudents';
+import ChangePassword from './pages/ChangePassword';
 
 function GuestRoute({ children }) {
   const { user, loading } = useAuth();
@@ -95,6 +96,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute roles={['student']}>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/change-password"
+        element={
+          <ProtectedRoute roles={['admin', 'student']}>
+            <ChangePassword />
           </ProtectedRoute>
         }
       />

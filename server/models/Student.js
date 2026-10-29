@@ -66,6 +66,15 @@ const studentSchema = new mongoose.Schema(
         type: String,
         default: null,
       },
+      storageProvider: {
+        type: String,
+        enum: ['local', 'supabase'],
+        default: 'local',
+      },
+      storagePath: {
+        type: String,
+        default: null,
+      },
       uploadedAt: {
         type: Date,
         default: null,

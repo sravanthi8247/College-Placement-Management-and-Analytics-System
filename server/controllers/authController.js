@@ -180,3 +180,75 @@ export const getMe = async (req, res) => {
     },
   });
 };
+
+const validateChangePasswordInput = (body) => {
+  const { currentPassword, newPassword, confirmPassword } = body;
+  const errors = [];
+
+  if (!currentPassword) {
+    errors.push('Current password is required');
+  }
+
+  if (!newPassword) {
+    errors.push('New password is required');
+  } else if (newPassword.length < 6) {
+    errors.push('New password must be at least 6 characters');
+  }
+
+  if (!confirmPassword) {
+    errors.push('Confirm password is required');
+  } else if (newPassword && newPassword !== confirmPassword) {
+    errors.push('New passwords do not match');
+  }
+
+  if (currentPassword && newPassword && currentPassword === newPassword) {
+    errors.push('New password must be different from current password');
+  }
+
+  return errors;
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const validationErrors = validateChangePasswordInput(req.body);
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: validationErrors.join(', '),
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    // Use only authenticated user's ID, ignoring any client-supplied user ID
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found',
+      });
+    }
+
+    // Verify current password with existing bcrypt matchPassword method
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect',
+      });
+    }
+
+    // Set plaintext password; Mongoose pre('save') hook hashes it exactly once with bcrypt round 12
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};

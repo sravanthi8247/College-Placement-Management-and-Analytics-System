@@ -173,6 +173,14 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
                       <span className="cpma-dropdown-icon">▦</span> Dashboard
                     </Link>
                   )}
+                  <Link
+                    to="/change-password"
+                    className="cpma-dropdown-item"
+                    role="menuitem"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <span className="cpma-dropdown-icon">🔒</span> Change Password
+                  </Link>
                   <button
                     type="button"
                     className="cpma-dropdown-item cpma-dropdown-logout"

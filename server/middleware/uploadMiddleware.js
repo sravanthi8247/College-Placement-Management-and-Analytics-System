@@ -1,6 +1,10 @@
 import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
 
@@ -34,26 +38,14 @@ export const uploadStudentSpreadsheet = multer({
   },
 });
 
-// Resume upload configuration
-export const RESUME_UPLOAD_DIR = path.resolve(process.cwd(), 'uploads', 'resumes');
+// Resume upload configuration (deterministic server/uploads/resumes directory for legacy local fallback)
+export const RESUME_UPLOAD_DIR = path.resolve(__dirname, '..', 'uploads', 'resumes');
 if (!fs.existsSync(RESUME_UPLOAD_DIR)) {
   fs.mkdirSync(RESUME_UPLOAD_DIR, { recursive: true });
 }
 
-const resumeDiskStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, RESUME_UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const userId = req.user?._id ? String(req.user._id) : 'user';
-    const timestamp = Date.now();
-    const random = Math.round(Math.random() * 1e9);
-    cb(null, `resume_${userId}_${timestamp}_${random}.pdf`);
-  },
-});
-
 export const uploadResume = multer({
-  storage: resumeDiskStorage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 2 * 1024 * 1024, // 2MB strict limit
   },

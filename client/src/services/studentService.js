@@ -118,16 +118,69 @@ export const deleteResume = async () => {
 };
 
 export const getResumeBlob = async (studentId = 'me') => {
-  const response = await api.get(`/students/${studentId}/resume`, {
-    responseType: 'blob',
-  });
-  return response.data;
+  try {
+    const response = await api.get(`/students/${studentId}/resume`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  } catch (err) {
+    if (err.response?.data instanceof Blob) {
+      try {
+        const text = await err.response.data.text();
+        const json = JSON.parse(text);
+        if (json && json.message) {
+          err.response.data = json;
+          err.message = json.message;
+        }
+      } catch {
+        // Not a JSON error blob; preserve original error
+      }
+    }
+    throw err;
+  }
 };
 
 export const openResumeInNewTab = async (studentId = 'me') => {
-  const blob = await getResumeBlob(studentId);
-  const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-  const url = window.URL.createObjectURL(pdfBlob);
-  window.open(url, '_blank');
-  setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+  // Pre-open new tab synchronously during user gesture to prevent browser popup blockers
+  let newTab = null;
+  try {
+    newTab = typeof window !== 'undefined' && window.open ? window.open('about:blank', '_blank') : null;
+    if (newTab) {
+      newTab.document.title = 'Loading Resume...';
+      newTab.document.body.innerHTML = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #334155; background-color: #f8fafc;">
+          <div style="border: 3px solid #cbd5e1; border-top-color: #2563eb; border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin-bottom: 16px;"></div>
+          <p style="font-size: 1rem; font-weight: 500; margin: 0;">Loading candidate resume...</p>
+          <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        </div>
+      `;
+    }
+  } catch {
+    newTab = null;
+  }
+
+  try {
+    const blob = await getResumeBlob(studentId);
+    const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(pdfBlob);
+
+    if (newTab && !newTab.closed) {
+      newTab.location.href = url;
+    } else {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(url), 120000);
+  } catch (err) {
+    if (newTab && !newTab.closed) {
+      newTab.close();
+    }
+    throw err;
+  }
 };

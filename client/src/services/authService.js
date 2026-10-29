@@ -15,6 +15,15 @@ export const getCurrentUser = async () => {
   return response.data;
 };
 
+export const changePassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+  const response = await api.put('/auth/change-password', {
+    currentPassword,
+    newPassword,
+    confirmPassword,
+  });
+  return response.data;
+};
+
 export const saveAuthData = (token, user) => {
   localStorage.setItem('token', token);
   localStorage.setItem('user', JSON.stringify(user));

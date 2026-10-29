@@ -14,6 +14,14 @@ import {
 } from '../utils/studentImport.js';
 import { toCsv } from '../utils/csv.js';
 import { RESUME_UPLOAD_DIR } from '../middleware/uploadMiddleware.js';
+import {
+  isSupabaseConfigured,
+  isCloudStorageRequired,
+  uploadResumeToSupabase,
+  downloadResumeFromSupabase,
+  deleteResumeFromSupabase,
+  isValidStoragePath,
+} from '../config/supabase.js';
 
 const duplicateMessage = (error) => {
   const field = Object.keys(error.keyPattern || {})[0];
@@ -527,77 +535,143 @@ export const downloadErrorReport = (req, res) => {
   }
 };
 
+export const resolveResumeFilePath = (storedFilename) => {
+  if (!storedFilename || typeof storedFilename !== 'string') return null;
+  const safeFilename = path.basename(storedFilename);
+  const candidates = [
+    path.join(RESUME_UPLOAD_DIR, safeFilename),
+    path.resolve(process.cwd(), 'server', 'uploads', 'resumes', safeFilename),
+    path.resolve(process.cwd(), 'uploads', 'resumes', safeFilename),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return candidates[0];
+};
+
 /**
  * Upload or replace resume for the logged-in student.
  */
 export const uploadMyResume = async (req, res) => {
   try {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: 'Please select a PDF resume file to upload.' });
     }
 
-    // Validate PDF magic bytes (%PDF)
-    try {
-      const buffer = Buffer.alloc(4);
-      const fd = fs.openSync(req.file.path, 'r');
-      fs.readSync(fd, buffer, 0, 4, 0);
-      fs.closeSync(fd);
-
-      if (buffer.toString('utf-8') !== '%PDF') {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({
-          message: 'Invalid file format. The uploaded file is not a valid PDF document.',
-        });
-      }
-    } catch (checkErr) {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-      return res.status(400).json({ message: 'Could not verify PDF file format.' });
+    // Validate PDF magic bytes (%PDF) from buffer
+    if (
+      req.file.buffer.length < 4 ||
+      req.file.buffer.subarray(0, 4).toString('utf-8') !== '%PDF'
+    ) {
+      return res.status(400).json({
+        message: 'Invalid file format. The uploaded file is not a valid PDF document.',
+      });
     }
 
     const student = await findStudentForUser(req.user);
     if (!student) {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       return res.status(404).json({ message: 'No student profile is linked to this account.' });
     }
 
-    // If an existing resume file is on disk, delete it to prevent orphaned files
-    if (student.resume?.storedFilename) {
-      const oldPath = path.join(RESUME_UPLOAD_DIR, student.resume.storedFilename);
-      if (fs.existsSync(oldPath)) {
-        try {
-          fs.unlinkSync(oldPath);
-        } catch (unlinkErr) {
-          console.error('Failed to remove old resume file:', unlinkErr);
-        }
+    const useSupabase = isSupabaseConfigured();
+    const cloudRequired = isCloudStorageRequired();
+
+    // In production/Render, fail safely if cloud storage is not configured instead of writing to ephemeral disk
+    if (!useSupabase && cloudRequired) {
+      return res.status(503).json({
+        message: 'Cloud resume storage is not configured on this server. Please contact the administrator.',
+      });
+    }
+
+    // Generate safe unique stored filename
+    const sanitizedUserId = String(req.user?._id || 'user').replace(/[^a-zA-Z0-9_-]/g, '');
+    const timestamp = Date.now();
+    const random = Math.round(Math.random() * 1e9);
+    const storedFilename = `resume_${sanitizedUserId}_${timestamp}_${random}.pdf`;
+
+    let storagePath = null;
+
+    if (useSupabase) {
+      storagePath = `resumes/${storedFilename}`;
+      const uploadResult = await uploadResumeToSupabase(
+        storagePath,
+        req.file.buffer,
+        req.file.mimetype || 'application/pdf'
+      );
+
+      if (!uploadResult.success) {
+        console.error('Supabase upload failed:', uploadResult.error);
+        return res.status(502).json({
+          message: 'Failed to upload resume to cloud storage. Please try again.',
+        });
+      }
+    } else {
+      // Local development or isolated test fallback
+      const localFilePath = path.join(RESUME_UPLOAD_DIR, storedFilename);
+      try {
+        fs.writeFileSync(localFilePath, req.file.buffer);
+      } catch (writeErr) {
+        console.error('Failed to save local resume file:', writeErr);
+        return res.status(500).json({ message: 'Failed to save resume locally.' });
       }
     }
 
+    // Snapshot existing resume to safely remove old object only after successful DB update
+    const oldResume = student.resume ? { ...(student.resume.toObject?.() || student.resume) } : null;
+
     student.resume = {
       filename: req.file.originalname,
-      storedFilename: req.file.filename,
+      storedFilename,
+      storageProvider: useSupabase ? 'supabase' : 'local',
+      storagePath: storagePath,
       uploadedAt: new Date(),
       size: req.file.size,
       contentType: 'application/pdf',
     };
 
-    await student.save();
+    try {
+      await student.save();
+    } catch (saveErr) {
+      // Roll back newly uploaded object if database save fails
+      if (useSupabase && storagePath) {
+        await deleteResumeFromSupabase(storagePath).catch(() => {});
+      } else {
+        const localCleanupPath = path.join(RESUME_UPLOAD_DIR, storedFilename);
+        if (fs.existsSync(localCleanupPath)) {
+          try {
+            fs.unlinkSync(localCleanupPath);
+          } catch {}
+        }
+      }
+      throw saveErr;
+    }
+
+    // Safe replacement: Clean up superseded old resume object only after successful DB update
+    if (oldResume?.storedFilename) {
+      if (oldResume.storageProvider === 'supabase' && oldResume.storagePath) {
+        deleteResumeFromSupabase(oldResume.storagePath).catch((err) => {
+          console.error('Failed to remove superseded Supabase resume object:', err);
+        });
+      } else {
+        const oldPath = resolveResumeFilePath(oldResume.storedFilename);
+        if (oldPath && fs.existsSync(oldPath)) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (unlinkErr) {
+            console.error('Failed to remove old resume file from disk:', unlinkErr);
+          }
+        }
+      }
+    }
 
     return res.status(200).json({
       message: 'Resume uploaded successfully.',
       resume: student.resume,
     });
   } catch (error) {
-    if (req.file?.path && fs.existsSync(req.file.path)) {
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (e) {
-        // ignore
-      }
-    }
+    console.error('Upload resume error:', error);
     return res.status(500).json({ message: 'Failed to upload resume. Please try again.' });
   }
 };
@@ -612,9 +686,28 @@ export const deleteMyResume = async (req, res) => {
       return res.status(404).json({ message: 'No student profile is linked to this account.' });
     }
 
+    if (!student.resume?.storedFilename && !student.resume?.storagePath) {
+      return res.status(200).json({ message: 'Resume removed successfully.' });
+    }
+
+    // If stored in Supabase, remove from bucket first
+    if (student.resume.storageProvider === 'supabase' && student.resume.storagePath) {
+      const deleteResult = await deleteResumeFromSupabase(student.resume.storagePath);
+      if (!deleteResult.success) {
+        const errMsg = deleteResult.error?.message?.toLowerCase() || '';
+        const isNotFound = errMsg.includes('not found') || deleteResult.error?.status === 404;
+        if (!isNotFound) {
+          return res.status(502).json({
+            message: 'Failed to delete resume from cloud storage. Please try again.',
+          });
+        }
+      }
+    }
+
+    // Clean up local disk file if present
     if (student.resume?.storedFilename) {
-      const filePath = path.join(RESUME_UPLOAD_DIR, student.resume.storedFilename);
-      if (fs.existsSync(filePath)) {
+      const filePath = resolveResumeFilePath(student.resume.storedFilename);
+      if (filePath && fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);
         } catch (err) {
@@ -623,9 +716,12 @@ export const deleteMyResume = async (req, res) => {
       }
     }
 
+    // Clear database metadata only after storage deletion succeeds
     student.resume = {
       filename: null,
       storedFilename: null,
+      storageProvider: 'local',
+      storagePath: null,
       uploadedAt: null,
       size: 0,
       contentType: 'application/pdf',
@@ -635,6 +731,7 @@ export const deleteMyResume = async (req, res) => {
 
     return res.status(200).json({ message: 'Resume removed successfully.' });
   } catch (error) {
+    console.error('Delete resume error:', error);
     return res.status(500).json({ message: 'Failed to delete resume.' });
   }
 };
@@ -673,28 +770,62 @@ export const getStudentResume = async (req, res) => {
       return res.status(404).json({ message: 'Student profile not found.' });
     }
 
-    if (!student.resume?.storedFilename) {
+    if (!student.resume?.storedFilename && !student.resume?.storagePath) {
       return res.status(404).json({ message: 'No resume is uploaded for this student.' });
     }
 
-    const filePath = path.join(RESUME_UPLOAD_DIR, student.resume.storedFilename);
+    const downloadName = student.resume.filename || `${student.name.replace(/\s+/g, '_')}_Resume.pdf`;
+    const safeName = downloadName.replace(/[^\w.-]/g, '_');
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Resume document not found on server.' });
+    // Supabase Storage streaming flow
+    if (student.resume.storageProvider === 'supabase' && student.resume.storagePath) {
+      if (!isValidStoragePath(student.resume.storagePath)) {
+        return res.status(500).json({ message: 'Corrupted resume storage path.' });
+      }
+
+      const downloadResult = await downloadResumeFromSupabase(student.resume.storagePath);
+      if (!downloadResult.success || !downloadResult.buffer) {
+        return res.status(404).json({
+          message: 'Resume document not found on storage server. Please upload your resume again.',
+        });
+      }
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `inline; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`
+      );
+      res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
+      return res.status(200).send(downloadResult.buffer);
     }
 
-    const downloadName = student.resume.filename || `${student.name.replace(/\s+/g, '_')}_Resume.pdf`;
+    // Legacy Local Storage streaming flow
+    const filePath = resolveResumeFilePath(student.resume.storedFilename);
+
+    if (!filePath || !fs.existsSync(filePath)) {
+      return res.status(404).json({
+        message: 'Resume document not found on server. Please upload your resume again.',
+      });
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `inline; filename="${encodeURIComponent(downloadName)}"`
+      `inline; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`
     );
     res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
 
-    return res.sendFile(filePath);
+    return res.sendFile(filePath, (err) => {
+      if (err && !res.headersSent) {
+        console.error('Error sending resume file:', err);
+        return res.status(500).json({ message: 'Failed to stream resume file.' });
+      }
+    });
   } catch (error) {
     console.error('Error fetching student resume:', error);
     return res.status(500).json({ message: 'Failed to retrieve resume.' });

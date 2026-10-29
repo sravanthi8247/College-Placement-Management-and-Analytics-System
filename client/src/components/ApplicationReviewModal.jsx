@@ -68,11 +68,12 @@ function ApplicationReviewModal({ application, isOpen, onClose, onSuccess }) {
 
   const handleOpenResume = async () => {
     if (!student._id) return;
+    setError('');
     setViewingResume(true);
     try {
       await openResumeInNewTab(student._id);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not load candidate resume.');
+      setError(err.response?.data?.message || err.message || 'Could not load candidate resume.');
     } finally {
       setViewingResume(false);
     }
