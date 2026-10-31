@@ -197,7 +197,7 @@ function StudentForm({
         />
       </label>
 
-      <label>
+      <label className="company-drive-form__full">
         Placement status
         <select
           name="placementStatus"

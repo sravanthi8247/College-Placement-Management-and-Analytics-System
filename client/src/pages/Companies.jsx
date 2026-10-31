@@ -511,7 +511,7 @@ function Companies() {
                   {eligiblePanel.eligibleCount} eligible of {eligiblePanel.students?.length || 0} students
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.875rem', cursor: 'pointer' }}>
                   <input
                     type="checkbox"

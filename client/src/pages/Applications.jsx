@@ -55,19 +55,20 @@ function Applications() {
       title={isAdmin ? 'Applications' : 'My Applications'}
       eyebrow={isAdmin ? 'Admin / Applications' : 'Student / Applications'}
     >
-      <div className="placements-heading" style={{ marginBottom: 24 }}>
-        <div>
-          <p className="placements-eyebrow">
-            {isAdmin ? 'APPLICATION MANAGEMENT' : 'PLACEMENT TRACKING'}
-          </p>
-          <h1>{isAdmin ? 'Student Applications' : 'My Applications'}</h1>
-          <p className="placements-subtitle">
-            {isAdmin
-              ? 'Review and manage all submitted student drive applications and outcomes.'
-              : 'Track the status and progress of your job and placement drive applications.'}
-          </p>
+      <main className="placements-main">
+        <div className="placements-heading" style={{ marginBottom: 24 }}>
+          <div>
+            <p className="placements-eyebrow">
+              {isAdmin ? 'APPLICATION MANAGEMENT' : 'PLACEMENT TRACKING'}
+            </p>
+            <h1>{isAdmin ? 'Student Applications' : 'My Applications'}</h1>
+            <p className="placements-subtitle">
+              {isAdmin
+                ? 'Review and manage all submitted student drive applications and outcomes.'
+                : 'Track the status and progress of your job and placement drive applications.'}
+            </p>
+          </div>
         </div>
-      </div>
 
       {error && (
         <div className="placements-error-banner" role="alert">
@@ -165,12 +166,18 @@ function Applications() {
                             type="button"
                             className="students-refresh"
                             style={{
-                              padding: '2px 8px',
-                              fontSize: '0.78rem',
+                              padding: '4px 10px',
+                              minHeight: '32px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.8rem',
                               backgroundColor: '#eff6ff',
                               borderColor: '#bfdbfe',
                               color: '#1d4ed8',
                               fontWeight: 600,
+                              cursor: 'pointer',
+                              touchAction: 'manipulation',
                             }}
                             title={`View resume: ${application.student.resume.filename}`}
                             onClick={() => openResumeInNewTab(application.student._id || 'me')}
@@ -191,6 +198,7 @@ function Applications() {
                           style={{
                             cursor: isAdmin ? 'pointer' : 'default',
                             fontSize: '0.8rem',
+                            touchAction: 'manipulation',
                           }}
                           onClick={() => {
                             if (isAdmin) setSelectedAppForReview(application);
@@ -207,12 +215,18 @@ function Applications() {
                             type="button"
                             className="students-refresh"
                             style={{
-                              padding: '3px 9px',
+                              padding: '4px 10px',
+                              minHeight: '32px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
                               fontSize: '0.8rem',
                               fontWeight: 600,
                               borderColor: '#3b82f6',
                               color: '#1d4ed8',
                               backgroundColor: '#ffffff',
+                              cursor: 'pointer',
+                              touchAction: 'manipulation',
                             }}
                             onClick={() => setSelectedAppForReview(application)}
                           >
@@ -228,6 +242,7 @@ function Applications() {
           </div>
         )}
       </section>
+      </main>
 
       <ApplicationReviewModal
         application={selectedAppForReview}

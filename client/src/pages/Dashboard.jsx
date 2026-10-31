@@ -165,8 +165,8 @@ function Dashboard() {
             <p className="cpma-muted-label">No student records yet.</p>
           ) : (
             (stats.branchDistribution || []).map((item) => (
-              <div className="cpma-overview-row" key={item.branch}>
-                <span>{item.branch}</span>
+              <div className="cpma-overview-row cpma-branch-row" key={item.branch}>
+                <span className="cpma-branch-name" title={item.branch}>{item.branch}</span>
                 <div className="cpma-progress-track" style={{ flex: 1, margin: '0 12px' }}>
                   <div
                     className="cpma-progress-fill"

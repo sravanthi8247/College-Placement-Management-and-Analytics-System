@@ -1,4 +1,3 @@
-
 .students-page {
   min-height: 100vh;
   background: #f4f7fb;
@@ -8,7 +7,9 @@
 .students-main {
   width: min(1500px, 100%);
   margin: 0 auto;
-  padding: 32px;
+  padding: 0;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .students-heading,
@@ -17,6 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .students-heading {
@@ -48,6 +50,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .students-primary-action {
@@ -55,6 +58,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
+  min-height: 40px;
   border: 1px solid #1e3a8a;
   border-radius: 9px;
   background: #17345f;
@@ -64,6 +68,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .students-primary-action:hover {
@@ -78,6 +84,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
+  min-height: 40px;
   border: 1px solid #dce3ed;
   border-radius: 9px;
   background: #fff;
@@ -86,6 +93,8 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
+  touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .students-refresh:hover,
@@ -116,6 +125,7 @@
 
 .students-retry-btn {
   padding: 6px 14px;
+  min-height: 34px;
   border: 1px solid #f87171;
   border-radius: 7px;
   background: #fff;
@@ -124,6 +134,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  touch-action: manipulation;
 }
 
 .students-retry-btn:hover {
@@ -264,25 +275,32 @@
 
 .students-search-wrap {
   display: flex;
-  flex: 1;
+  flex: 1 1 240px;
   align-items: center;
   gap: 10px;
   min-width: 0;
+  height: 42px;
   padding: 0 13px;
   border: 1px solid #dfe6f0;
   border-radius: 9px;
   background: #fbfcfe;
   color: #8290a5;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .students-search-wrap > span {
-  font-size: 22px;
+  font-size: 20px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .students-search-wrap input {
   width: 100%;
   min-width: 0;
-  padding: 12px 0;
+  height: 100%;
+  padding: 0;
   outline: none;
   border: none;
   background: transparent;
@@ -297,8 +315,9 @@
 }
 
 .students-status-filter {
-  min-width: 145px;
-  padding: 12px;
+  height: 42px;
+  min-width: 135px;
+  padding: 0 12px;
   border: 1px solid #dfe6f0;
   border-radius: 9px;
   outline: none;
@@ -306,15 +325,28 @@
   color: #475873;
   font: inherit;
   font-size: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.students-status-filter:focus {
+  border-color: #7197e8;
+  box-shadow: 0 0 0 3px rgb(75 120 220 / 10%);
 }
 
 .students-table-scroll {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .students-table {
   width: 100%;
+  min-width: 760px;
   border-collapse: collapse;
   text-align: left;
   white-space: nowrap;
@@ -419,13 +451,17 @@
 }
 
 .students-actions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .students-edit-btn,
 .students-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
   padding: 6px 14px;
   border: 1px solid transparent;
   border-radius: 7px;
@@ -434,6 +470,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  touch-action: manipulation;
 }
 
 .students-edit-btn {
@@ -465,6 +502,7 @@
   padding: 18px 24px;
   border-top: 1px solid #edf0f5;
   background: #fbfcfe;
+  box-sizing: border-box;
 }
 
 .table-pagination-info {
@@ -520,6 +558,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
+  min-height: 34px;
   border: 1px solid #dce3ed;
   border-radius: 6px;
   background: #fff;
@@ -529,6 +568,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  touch-action: manipulation;
 }
 
 .table-pagination-btn:hover:not(:disabled) {
@@ -630,23 +670,38 @@
   text-align: center;
 }
 
-@media (max-width: 1150px) {
-  .students-main {
-    padding: 24px;
-  }
+/* ============================================================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================================================ */
 
+/* Tablet & Medium Screens (769px - 1024px) */
+@media (max-width: 1024px) {
   .students-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .students-toolbar {
+    gap: 10px;
+  }
+
+  .students-search-wrap {
+    flex: 1 1 100%;
+  }
+
+  .students-status-filter {
+    flex: 1 1 calc(25% - 8px);
+    min-width: 120px;
   }
 }
 
-@media (max-width: 650px) {
-  .students-main {
-    padding: 18px 12px;
-  }
-
+/* Phablets & Small Tablets (481px - 768px) */
+@media (max-width: 768px) {
   .students-heading {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
   .students-heading h1 {
@@ -654,65 +709,137 @@
   }
 
   .students-subtitle {
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 13px;
   }
 
-  .students-refresh {
-    padding: 9px;
-    font-size: 11px;
+  .students-header-actions {
+    width: 100%;
   }
 
-  .students-stats {
-    gap: 10px;
-  }
-
-  .students-stat-card {
+  .students-section-heading {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    padding: 15px 11px;
+    gap: 12px;
   }
 
-  .students-stat-icon {
-    flex-basis: 34px;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    font-size: 16px;
-  }
-
-  .students-stat-card h2 {
-    font-size: 22px;
-  }
-
-  .students-stat-card p {
-    font-size: 11px;
-  }
-
-  .students-stat-card span {
-    font-size: 10px;
-  }
-
-  .students-form-panel {
-    padding: 16px;
+  .students-section-heading .students-cancel {
+    align-self: flex-start;
   }
 
   .students-table-heading {
-    padding: 18px 16px;
+    padding: 18px 16px 14px;
   }
 
   .students-toolbar {
-    align-items: stretch;
-    flex-direction: column;
     padding: 0 16px 16px;
+    gap: 10px;
+  }
+
+  .students-search-wrap {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .students-status-filter {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+    width: calc(50% - 6px);
+  }
+
+  .table-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .table-pagination-info {
+    text-align: center;
+  }
+
+  .table-pagination-controls {
+    justify-content: space-between;
     width: 100%;
   }
 
   .students-table th:first-child,
   .students-table td:first-child {
     padding-left: 16px;
+  }
+}
+
+/* Mobile Smartphones (320px - 480px) */
+@media (max-width: 480px) {
+  .students-heading h1 {
+    font-size: 21px;
+  }
+
+  .students-subtitle {
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .students-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .students-stat-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .students-stat-card h2 {
+    font-size: 24px;
+  }
+
+  .students-form-panel {
+    padding: 16px 12px;
+  }
+
+  .students-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 0 12px 14px;
+  }
+
+  .students-status-filter {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .table-pagination-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .table-pagination-per-page {
+    justify-content: center;
+  }
+
+  .table-pagination-nav {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .table-pagination-btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .table-pagination-indicator {
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .students-edit-btn,
+  .students-delete-btn {
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }

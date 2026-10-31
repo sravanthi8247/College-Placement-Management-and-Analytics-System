@@ -303,3 +303,39 @@
   background: #f1f5f9;
 }
 
+/* ============================================================================
+   RESPONSIVE MEDIA QUERIES FOR STUDENT SELECTOR
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .student-selector-selected-box {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .student-selector-clear-btn {
+    width: 100%;
+    min-height: 36px;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+
+  .student-selector-input {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  .student-selector-item {
+    min-height: 44px;
+    padding: 10px 14px;
+    touch-action: manipulation;
+  }
+
+  .student-selector-page-btn {
+    min-height: 34px;
+    padding: 6px 12px;
+    touch-action: manipulation;
+  }
+}
+

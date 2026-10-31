@@ -123,11 +123,12 @@ function BulkImportStudents() {
 
   return (
     <AppLayout title="Bulk Student Import" eyebrow="Admin / Students / Import">
-      <div style={{ marginBottom: 16 }}>
-        <Link to="/students" style={{ color: '#2563eb', textDecoration: 'none' }}>
-          ← Back to Student Directory
-        </Link>
-      </div>
+      <main className="students-main">
+        <div style={{ marginBottom: 16 }}>
+          <Link to="/students" style={{ color: '#2563eb', textDecoration: 'none' }}>
+            ← Back to Student Directory
+          </Link>
+        </div>
 
       <Alert type="error" message={error} />
       <Alert type="success" message={success} />
@@ -139,10 +140,11 @@ function BulkImportStudents() {
             <h2>Upload Student Spreadsheet</h2>
             <p>Import thousands of students in batch using CSV or Excel (.xlsx) spreadsheets.</p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
               type="button"
               className="students-refresh"
+              style={{ minHeight: '36px', touchAction: 'manipulation' }}
               onClick={() => handleDownloadTemplate('csv')}
             >
               📥 CSV Template
@@ -150,6 +152,7 @@ function BulkImportStudents() {
             <button
               type="button"
               className="students-refresh"
+              style={{ minHeight: '36px', touchAction: 'manipulation' }}
               onClick={() => handleDownloadTemplate('xlsx')}
             >
               📥 Excel Template
@@ -446,6 +449,7 @@ function BulkImportStudents() {
           )}
         </section>
       )}
+      </main>
     </AppLayout>
   );
 }

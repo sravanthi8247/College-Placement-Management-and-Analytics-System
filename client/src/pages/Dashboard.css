@@ -1,4 +1,3 @@
-
 :root {
   --cpma-navy: #142b4a;
   --cpma-navy-light: #1d3b60;
@@ -16,26 +15,41 @@
 
 .cpma-dashboard {
   min-height: 100vh;
+  width: 100%;
   background: var(--cpma-bg);
   color: var(--cpma-text);
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 14px;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .cpma-dashboard a {
   text-decoration: none;
 }
 
+/* ============================================================================
+   DESKTOP SIDEBAR (>= 1025px)
+   ============================================================================ */
 .cpma-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
-  z-index: 20;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   width: 250px;
   padding: 27px 17px 18px;
   background: var(--cpma-navy);
   color: #fff;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s ease;
+}
+
+.cpma-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .cpma-brand {
@@ -44,6 +58,30 @@
   gap: 12px;
   padding: 0 8px 30px;
   color: #fff;
+}
+
+.cpma-drawer-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-top: -24px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.cpma-drawer-close-btn:hover,
+.cpma-drawer-close-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  outline: none;
 }
 
 .cpma-brand-icon {
@@ -91,7 +129,7 @@
 
 .cpma-nav-link {
   display: flex;
-  min-height: 46px;
+  min-height: 48px;
   align-items: center;
   gap: 13px;
   padding: 0 13px;
@@ -121,6 +159,7 @@
 
 .cpma-sidebar-bottom {
   margin-top: auto;
+  padding-top: 18px;
 }
 
 .cpma-sidebar-note {
@@ -160,6 +199,7 @@
 .cpma-logout {
   display: flex;
   width: 100%;
+  min-height: 44px;
   align-items: center;
   gap: 12px;
   padding: 12px 13px;
@@ -170,50 +210,146 @@
   cursor: pointer;
   font: inherit;
   text-align: left;
+  transition: background 0.2s, color 0.2s;
 }
 
-.cpma-logout:hover {
+.cpma-logout:hover,
+.cpma-logout:focus-visible {
   background: #2a466b;
   color: #fff;
+  outline: none;
 }
 
 .cpma-logout span {
   font-size: 19px;
 }
 
+/* Drawer backdrop (Mobile / Tablet) */
+.cpma-drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 998;
+  animation: cpmaFadeIn 0.2s ease-out;
+}
+
+@keyframes cpmaFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============================================================================
+   MAIN CONTENT SHELL
+   ============================================================================ */
 .cpma-main {
   min-width: 0;
   min-height: 100vh;
   margin-left: 250px;
+  display: flex;
+  flex-direction: column;
 }
 
+/* ============================================================================
+   TOPBAR & HEADER
+   ============================================================================ */
 .cpma-topbar {
   display: flex;
-  min-height: 91px;
+  min-height: 80px;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 19px 36px;
+  gap: 16px;
+  padding: 16px 36px;
   border-bottom: 1px solid var(--cpma-border);
   background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.cpma-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cpma-topbar-titles {
+  min-width: 0;
 }
 
 .cpma-breadcrumb {
-  margin-bottom: 7px;
+  margin-bottom: 4px;
   color: var(--cpma-muted);
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cpma-topbar h1 {
   margin: 0;
   color: var(--cpma-text);
-  font-size: 21px;
+  font-size: clamp(17px, 2.3vw, 21px);
   font-weight: 750;
   letter-spacing: -0.6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Hamburger menu toggle button (off-canvas trigger) */
+.cpma-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4.5px;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.cpma-hamburger:hover,
+.cpma-hamburger:focus-visible {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  outline: none;
+}
+
+.cpma-hamburger-bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #1e293b;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cpma-hamburger.open .cpma-hamburger-bar:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.cpma-hamburger.open .cpma-hamburger-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.cpma-hamburger.open .cpma-hamburger-bar:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* User Profile & Dropdown Menu */
 .cpma-user-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .cpma-user-btn {
@@ -229,6 +365,7 @@
   font: inherit;
   color: inherit;
   text-align: left;
+  min-height: 44px;
 }
 
 .cpma-user-btn:hover,
@@ -265,7 +402,7 @@
 }
 
 .cpma-user-details strong {
-  max-width: 190px;
+  max-width: 170px;
   overflow: hidden;
   color: var(--cpma-text);
   font-size: 12px;
@@ -294,14 +431,15 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 240px;
-  max-width: calc(100vw - 32px);
+  min-width: 230px;
+  max-width: calc(100vw - 24px);
+  width: max-content;
   background: #ffffff;
   border: 1px solid var(--cpma-border);
   border-radius: 12px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
   padding: 8px 0;
-  z-index: 1000;
+  z-index: 1050;
   animation: cpmaDropdownFade 0.15s ease-out;
 }
 
@@ -391,6 +529,7 @@
   gap: 10px;
   width: 100%;
   padding: 10px 16px;
+  min-height: 40px;
   background: transparent;
   border: 0;
   color: #334155;
@@ -435,30 +574,39 @@
   animation: spin 0.75s linear infinite;
 }
 
+/* ============================================================================
+   PAGE CONTENT CONTAINER
+   ============================================================================ */
 .cpma-content {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 30px 36px 20px;
+  padding: 28px 36px 24px;
+  flex: 1;
 }
 
+/* ============================================================================
+   WELCOME HERO BANNER
+   ============================================================================ */
 .cpma-welcome {
   position: relative;
   display: flex;
-  min-height: 172px;
+  min-height: 160px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   overflow: hidden;
-  padding: 29px 32px;
+  padding: 26px 32px;
   border-radius: 15px;
   background: linear-gradient(115deg, #17375f 0%, #244f82 70%, #3565a0 100%);
   color: #fff;
+  box-shadow: 0 4px 20px rgba(20, 43, 74, 0.12);
 }
 
 .cpma-welcome > div:first-child {
   position: relative;
   z-index: 1;
+  max-width: 720px;
 }
 
 .cpma-eyebrow {
@@ -469,47 +617,50 @@
 }
 
 .cpma-welcome h2 {
-  margin: 12px 0 8px;
+  margin: 10px 0 8px;
   color: #fff;
-  font-size: clamp(21px, 2.2vw, 28px);
+  font-size: clamp(20px, 2.2vw, 28px);
   font-weight: 750;
   letter-spacing: -0.8px;
 }
 
 .cpma-welcome p {
-  max-width: 520px;
+  max-width: 540px;
   margin: 0;
   color: #d0dced;
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: 12.5px;
+  line-height: 1.7;
 }
 
 .cpma-welcome-mark {
   display: grid;
-  width: 125px;
-  height: 125px;
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
   place-items: center;
   border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 32px;
+  border-radius: 28px;
   background: rgb(255 255 255 / 8%);
   transform: rotate(-8deg);
 }
 
 .cpma-welcome-mark span {
   color: rgb(255 255 255 / 90%);
-  font-size: 39px;
+  font-size: 36px;
   font-weight: 850;
-  letter-spacing: -3px;
+  letter-spacing: -2px;
 }
 
+/* ============================================================================
+   DASHBOARD SECTION HEADINGS & BUTTONS
+   ============================================================================ */
 .cpma-section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 30px 0 16px;
+  margin: 28px 0 16px;
 }
 
 .cpma-refresh-btn {
@@ -517,6 +668,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
+  min-height: 40px;
   border: 1px solid #dce3ed;
   border-radius: 9px;
   background: #fff;
@@ -554,17 +706,18 @@
 }
 
 .cpma-error {
-  margin-bottom: 15px;
-  padding: 12px 15px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
   border: 1px solid #f2c8c8;
   border-radius: 8px;
   background: #fff2f2;
   color: #a72f2f;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .cpma-retry-btn {
-  padding: 5px 12px;
+  padding: 6px 14px;
+  min-height: 34px;
   border: 1px solid #f87171;
   border-radius: 6px;
   background: #fff;
@@ -579,6 +732,9 @@
   background: #fee2e2;
 }
 
+/* ============================================================================
+   STATISTICS KPI CARDS GRID
+   ============================================================================ */
 .cpma-stat-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -587,11 +743,11 @@
 
 .cpma-stat-card {
   min-width: 0;
-  padding: 19px 20px;
+  padding: 20px;
   border: 1px solid var(--cpma-border);
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 3px 12px rgb(24 45 80 / 2%);
+  box-shadow: 0 3px 12px rgb(24 45 80 / 3%);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -651,22 +807,16 @@
   color: #138f88;
 }
 
-.cpma-stat-dot {
-  color: #a8b1c0;
-  font-size: 12px;
-  letter-spacing: 2px;
-}
-
 .cpma-stat-title {
-  margin: 17px 0 7px;
+  margin: 16px 0 6px;
   color: #66738a;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .cpma-stat-value {
   color: #1c2c45;
-  font-size: clamp(25px, 2.4vw, 32px);
+  font-size: clamp(24px, 2.3vw, 32px);
   font-weight: 800;
   letter-spacing: -1px;
   overflow-wrap: anywhere;
@@ -675,23 +825,26 @@
 .cpma-stat-description {
   margin: 8px 0 0;
   color: #96a0b0;
-  font-size: 10px;
+  font-size: 10.5px;
 }
 
+/* ============================================================================
+   LOWER PANELS & ANALYTICS WIDGETS
+   ============================================================================ */
 .cpma-lower-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 17px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 18px;
   margin-top: 22px;
 }
 
 .cpma-panel {
   min-width: 0;
-  padding: 23px;
+  padding: 24px;
   border: 1px solid var(--cpma-border);
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 3px 12px rgb(24 45 80 / 2%);
+  box-shadow: 0 3px 12px rgb(24 45 80 / 3%);
 }
 
 .cpma-panel-heading {
@@ -699,7 +852,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
+}
+
+.cpma-panel-heading a {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.cpma-panel-heading a:hover {
+  background: #eff6ff;
+  text-decoration: underline;
 }
 
 .cpma-panel-tag {
@@ -726,7 +893,7 @@
 
 .cpma-muted-label {
   color: #7f8ba0;
-  font-size: 11px;
+  font-size: 11.5px;
 }
 
 .cpma-rate-summary strong {
@@ -738,8 +905,8 @@
 
 .cpma-rate-icon {
   display: grid;
-  width: 39px;
-  height: 39px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border-radius: 10px;
   background: #e7f8ee;
@@ -768,28 +935,49 @@
   gap: 12px;
   margin-top: 11px;
   color: #7f8ba0;
-  font-size: 10px;
+  font-size: 10.5px;
 }
 
 .cpma-overview-divider {
   height: 1px;
-  margin: 23px 0 17px;
+  margin: 22px 0 16px;
   background: var(--cpma-border);
 }
 
 .cpma-overview-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  color: #657187;
-  font-size: 11px;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf0f5;
+  color: #475569;
+  font-size: 12px;
+  transition: background 0.15s ease;
+}
+
+.cpma-overview-row:last-child {
+  border-bottom: none;
+}
+
+.cpma-overview-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.cpma-branch-name {
+  max-width: 140px;
+  flex: 0 1 auto !important;
 }
 
 .cpma-overview-row strong {
   margin-left: auto;
-  color: #24344d;
-  font-size: 12px;
+  color: #1e293b;
+  font-size: 12.5px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .cpma-overview-bullet {
@@ -807,6 +995,7 @@
   background: #f0b75e;
 }
 
+/* Quick access widget */
 .cpma-quick-panel {
   display: flex;
   flex-direction: column;
@@ -815,10 +1004,16 @@
 .cpma-quick-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 13px 0;
+  gap: 14px;
+  padding: 13px 8px;
   border-bottom: 1px solid #edf0f5;
   color: inherit;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.cpma-quick-link:hover {
+  background: #f8fafc;
 }
 
 .cpma-quick-link:last-child {
@@ -826,8 +1021,8 @@
 }
 
 .cpma-quick-icon {
-  width: 39px;
-  height: 39px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   font-size: 11px;
 }
@@ -837,23 +1032,23 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .cpma-quick-text strong {
-  color: #2b3950;
-  font-size: 11px;
+  color: #1e293b;
+  font-size: 12px;
 }
 
 .cpma-quick-text small {
-  color: #8b96a8;
-  font-size: 10px;
+  color: #64748b;
+  font-size: 11px;
 }
 
 .cpma-quick-arrow {
-  color: #8d9ab0;
-  font-size: 19px;
-  transition: transform 0.2s ease;
+  color: #94a3b8;
+  font-size: 18px;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .cpma-quick-link:hover .cpma-quick-arrow {
@@ -864,22 +1059,28 @@
 .cpma-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 15px;
-  margin-top: 24px;
-  padding: 17px 0 5px;
+  margin-top: 32px;
+  padding: 20px 0 10px;
   border-top: 1px solid #e5eaf2;
-  color: #939daf;
-  font-size: 10px;
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 .cpma-mobile-nav {
   display: none;
 }
 
+/* ============================================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================================ */
+
+/* Extra large screens (>= 1500px) */
 @media (min-width: 1500px) {
   .cpma-content {
-    padding-right: 46px;
-    padding-left: 46px;
+    padding-right: 48px;
+    padding-left: 48px;
   }
 
   .cpma-stat-grid {
@@ -887,200 +1088,284 @@
   }
 }
 
-@media (max-width: 1100px) {
-  .cpma-sidebar {
-    width: 220px;
+/* Tablets and below (< 1025px): Activate off-canvas navigation drawer */
+@media (max-width: 1024px) {
+  .cpma-main {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
-  .cpma-main {
-    margin-left: 220px;
+  .cpma-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100%;
+    height: 100dvh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: none;
+    visibility: hidden;
+    pointer-events: none;
+    padding: 24px 18px 20px;
+  }
+
+  .cpma-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 35px rgba(0, 0, 0, 0.4);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .cpma-drawer-backdrop {
+    display: block;
+  }
+
+  .cpma-hamburger {
+    display: inline-flex;
+  }
+
+  .cpma-drawer-close-btn {
+    display: inline-flex;
   }
 
   .cpma-topbar {
-    padding-right: 24px;
-    padding-left: 24px;
+    padding: 14px 24px;
+    min-height: 72px;
   }
 
   .cpma-content {
-    padding: 25px 24px;
+    padding: 24px;
   }
 
   .cpma-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 
   .cpma-lower-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cpma-panel {
+    padding: 20px;
   }
 }
 
-@media (max-width: 680px) {
-  .cpma-sidebar {
-    position: static;
-    width: 100%;
-    padding: 14px 14px 12px;
-  }
-
-  .cpma-brand {
-    padding: 0 5px 14px;
-  }
-
-  .cpma-brand-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .cpma-nav-label,
-  .cpma-sidebar-bottom {
-    display: none;
-  }
-
-  .cpma-side-nav {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .cpma-nav-link {
-    min-height: 39px;
-    flex: 0 0 auto;
-    gap: 6px;
-    padding: 0 10px;
-    font-size: 11px;
-  }
-
-  .cpma-nav-icon {
-    width: auto;
-    font-size: 16px;
-  }
-
-  .cpma-main {
-    margin-left: 0;
-  }
-
+/* Phablets & Small Tablets (481px - 768px) */
+@media (max-width: 768px) {
   .cpma-topbar {
-    min-height: 75px;
-    padding: 14px 17px;
+    padding: 12px 18px;
+    min-height: 66px;
   }
 
   .cpma-topbar h1 {
-    font-size: 17px;
-  }
-
-  .cpma-user {
-    gap: 7px;
-  }
-
-  .cpma-avatar {
-    width: 34px;
-    height: 34px;
-  }
-
-  .cpma-user-details strong {
-    max-width: 90px;
-    font-size: 10px;
-  }
-
-  .cpma-user-details span {
-    font-size: 10px;
-  }
-
-  .cpma-user-btn {
-    padding: 2px 6px 2px 2px;
-    gap: 6px;
-  }
-
-  .cpma-dropdown-menu {
-    right: -4px;
-    min-width: 210px;
+    font-size: 18px;
   }
 
   .cpma-content {
-    padding: 18px 14px;
+    padding: 20px 16px;
   }
 
   .cpma-welcome {
-    min-height: 150px;
-    padding: 22px 19px;
+    padding: 20px 20px;
+    min-height: 140px;
   }
 
   .cpma-welcome h2 {
     font-size: 21px;
   }
 
-  .cpma-welcome p {
-    font-size: 11px;
-  }
-
   .cpma-welcome-mark {
-    width: 64px;
-    height: 64px;
-    border-radius: 17px;
+    width: 75px;
+    height: 75px;
+    border-radius: 20px;
   }
 
   .cpma-welcome-mark span {
-    font-size: 23px;
-  }
-
-  .cpma-eyebrow {
-    font-size: 8px;
-    letter-spacing: 1px;
-  }
-
-  .cpma-section-heading {
-    margin-top: 24px;
+    font-size: 26px;
   }
 
   .cpma-stat-grid {
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
   .cpma-stat-card {
-    padding: 14px;
-  }
-
-  .cpma-stat-icon {
-    width: 35px;
-    height: 35px;
-    border-radius: 9px;
-    font-size: 10px;
-  }
-
-  .cpma-stat-title {
-    margin-top: 13px;
-    font-size: 11px;
+    padding: 16px 15px;
   }
 
   .cpma-stat-value {
-    font-size: 25px;
+    font-size: 24px;
   }
 
-  .cpma-stat-description {
-    font-size: 9px;
-    line-height: 1.5;
+  .cpma-lower-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .cpma-panel {
-    padding: 17px;
+    padding: 18px;
   }
 
   .cpma-footer {
     flex-direction: column;
-    font-size: 9px;
+    text-align: center;
+    gap: 8px;
   }
 }
 
-@media (max-width: 360px) {
-  .cpma-stat-grid {
-    grid-template-columns: 1fr;
+/* Mobile Phones (320px - 480px) */
+@media (max-width: 480px) {
+  .cpma-topbar {
+    padding: 10px 12px;
+    min-height: 60px;
+    gap: 8px;
+  }
+
+  .cpma-topbar-left {
+    gap: 10px;
+  }
+
+  .cpma-topbar-titles h1 {
+    font-size: 16px;
+  }
+
+  .cpma-breadcrumb {
+    font-size: 10px;
+  }
+
+  .cpma-hamburger {
+    width: 38px;
+    height: 38px;
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .cpma-hamburger-bar {
+    width: 18px;
+  }
+
+  .cpma-user-btn {
+    padding: 2px 4px;
+    gap: 6px;
+    min-height: 38px;
+  }
+
+  .cpma-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .cpma-user-details span {
+    display: none;
+  }
+
+  .cpma-user-details strong {
+    max-width: 80px;
+    font-size: 11px;
+  }
+
+  .cpma-dropdown-menu {
+    right: 0;
+    min-width: 210px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .cpma-content {
+    padding: 16px 12px;
+  }
+
+  .cpma-welcome {
+    padding: 18px 14px;
+    min-height: auto;
+  }
+
+  .cpma-welcome h2 {
+    font-size: 19px;
+  }
+
+  .cpma-welcome p {
+    font-size: 11.5px;
+    line-height: 1.6;
   }
 
   .cpma-welcome-mark {
     display: none;
   }
 
-  .cpma-progress-labels {
-    font-size: 9px;
+  .cpma-section-heading {
+    margin: 20px 0 12px;
+  }
+
+  .cpma-stat-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cpma-stat-card {
+    padding: 14px 15px;
+  }
+
+  .cpma-stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+  }
+
+  .cpma-stat-title {
+    margin: 12px 0 4px;
+    font-size: 12px;
+  }
+
+  .cpma-stat-value {
+    font-size: 26px;
+  }
+
+  .cpma-lower-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .cpma-panel {
+    padding: 16px 14px;
+  }
+
+  .cpma-panel-heading h2 {
+    font-size: 15px;
+  }
+
+  .cpma-rate-summary strong {
+    font-size: 26px;
+  }
+
+  .cpma-rate-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .cpma-quick-link {
+    padding: 11px 4px;
+    gap: 10px;
+  }
+
+  .cpma-quick-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cpma-footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+    font-size: 10px;
+    margin-top: 24px;
   }
 }

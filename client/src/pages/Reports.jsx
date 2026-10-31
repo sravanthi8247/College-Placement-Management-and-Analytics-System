@@ -54,7 +54,8 @@ function Reports() {
 
   return (
     <AppLayout title="Analytics and reports" eyebrow="Admin / Reports">
-      <div className="students-heading">
+      <main className="students-main">
+        <div className="students-heading">
         <div>
           <p className="students-eyebrow">REPORTS &amp; ANALYTICS</p>
           <h1>Placement Reports</h1>
@@ -275,6 +276,7 @@ function Reports() {
           </section>
         </>
       )}
+      </main>
     </AppLayout>
   );
 }

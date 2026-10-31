@@ -29,6 +29,8 @@ function Register() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -192,26 +194,34 @@ function Register() {
           label="Password"
           id="password"
           name="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           value={formData.password}
           onChange={handleChange}
           placeholder="Minimum 6 characters"
           error={fieldErrors.password}
           required
           autoComplete="new-password"
+          showPasswordToggle
+          isPasswordVisible={showPassword}
+          onTogglePassword={() => setShowPassword((prev) => !prev)}
+          toggleAriaLabel={showPassword ? 'Hide password' : 'Show password'}
         />
 
         <FormInput
           label="Confirm Password"
           id="confirmPassword"
           name="confirmPassword"
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           value={formData.confirmPassword}
           onChange={handleChange}
           placeholder="Re-enter your password"
           error={fieldErrors.confirmPassword}
           required
           autoComplete="new-password"
+          showPasswordToggle
+          isPasswordVisible={showConfirmPassword}
+          onTogglePassword={() => setShowConfirmPassword((prev) => !prev)}
+          toggleAriaLabel={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
         />
 
         <div className="auth-form__submit">

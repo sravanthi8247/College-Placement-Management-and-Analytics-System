@@ -15,6 +15,13 @@
   margin-left: 0.125rem;
 }
 
+.form-group__input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .form-group__input,
 .form-group select {
   width: 100%;
@@ -26,6 +33,18 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-group__input--with-toggle {
+  padding-right: 2.75rem;
+}
+
+/* Hide native Edge/IE password reveal button to prevent duplicate icons */
+.form-group__input::-ms-reveal,
+.form-group__input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .form-group__input:focus,
@@ -58,4 +77,48 @@
   background-repeat: no-repeat;
   background-position: right 1rem center;
   padding-right: 2.5rem;
+}
+
+.form-group__toggle-password {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  z-index: 2;
+  line-height: 1;
+}
+
+.form-group__toggle-password:hover {
+  color: #0f172a;
+  background-color: rgba(100, 116, 139, 0.12);
+}
+
+.form-group__toggle-password:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.form-group__toggle-password:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-group__eye-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  display: block;
+  pointer-events: none;
 }

@@ -168,7 +168,8 @@ function Profile() {
 
   return (
     <AppLayout title="My Profile" eyebrow="Student / Profile">
-      <section className="students-form-panel">
+      <main className="students-main">
+        <section className="students-form-panel">
         <div className="students-section-heading">
           <div>
             <h2>Academic and contact details</h2>
@@ -289,7 +290,7 @@ function Profile() {
                 <button
                   type="button"
                   className="students-refresh"
-                  style={{ backgroundColor: '#2563eb', color: '#fff', borderColor: '#2563eb' }}
+                  style={{ backgroundColor: '#2563eb', color: '#fff', borderColor: '#2563eb', minHeight: '36px', touchAction: 'manipulation' }}
                   onClick={handleViewResume}
                 >
                   👁 View Resume
@@ -297,7 +298,7 @@ function Profile() {
                 <button
                   type="button"
                   className="students-refresh"
-                  style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                  style={{ color: '#dc2626', borderColor: '#fca5a5', minHeight: '36px', touchAction: 'manipulation' }}
                   onClick={handleDeleteResume}
                 >
                   ✕ Remove
@@ -393,12 +394,13 @@ function Profile() {
           <Link
             to="/change-password"
             className="students-refresh"
-            style={{ textDecoration: 'none', backgroundColor: '#2563eb', color: '#ffffff', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            style={{ textDecoration: 'none', backgroundColor: '#2563eb', color: '#ffffff', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: '38px', touchAction: 'manipulation' }}
           >
             <span>🔒</span> Change Password
           </Link>
         </div>
       </section>
+      </main>
     </AppLayout>
   );
 }

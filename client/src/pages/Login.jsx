@@ -17,6 +17,7 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,13 +84,17 @@ function Login() {
           label="Password"
           id="password"
           name="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           value={formData.password}
           onChange={handleChange}
           placeholder="Enter your password"
           error={fieldErrors.password}
           required
           autoComplete="off"
+          showPasswordToggle
+          isPasswordVisible={showPassword}
+          onTogglePassword={() => setShowPassword((prev) => !prev)}
+          toggleAriaLabel={showPassword ? 'Hide password' : 'Show password'}
         />
 
         <div className="auth-form__submit">

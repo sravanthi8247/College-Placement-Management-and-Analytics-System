@@ -290,7 +290,7 @@ function CompanyForm({ onCompanyAdded, selectedCompany, onUpdateCompany }) {
         </select>
       </label>
 
-      <label>
+      <label className="company-drive-form__full">
         Drive Description
         <textarea
           name="description"

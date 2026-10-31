@@ -1,6 +1,8 @@
 .students-container {
   max-width: 100%;
-  margin: 16px;
+  margin: 16px auto;
+  box-sizing: border-box;
+  min-width: 0;
   background: var(--color-white);
   padding: 24px;
   border-radius: var(--radius-lg);
@@ -117,7 +119,7 @@
 
 @media (max-width: 768px) {
   .students-container {
-    margin: 8px;
+    margin: 8px auto;
     padding: 15px;
     overflow-x: auto;
     border-radius: var(--radius-md);
@@ -128,6 +130,27 @@
   }
 
   .students-table {
-    min-width: 900px;
+    min-width: 760px;
+  }
+
+  .students-table button {
+    min-height: 34px;
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 480px) {
+  .students-container {
+    margin: 4px auto;
+    padding: 12px;
+  }
+
+  .students-container h1 {
+    font-size: 1.2rem;
+  }
+
+  .students-table button {
+    min-height: 36px;
+    padding: 8px 12px;
   }
 }

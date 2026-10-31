@@ -9,6 +9,7 @@
   z-index: 1000;
   padding: 16px;
   animation: fadeIn 0.15s ease-out;
+  box-sizing: border-box;
 }
 
 .review-modal-content {
@@ -23,6 +24,7 @@
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -42,6 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .review-modal-header h2 {
@@ -64,8 +67,14 @@
   font-size: 1.4rem;
   cursor: pointer;
   padding: 4px 8px;
+  min-height: 36px;
+  min-width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
   transition: color 0.15s, background-color 0.15s;
+  touch-action: manipulation;
 }
 
 .review-modal-close:hover {
@@ -76,6 +85,7 @@
 .review-modal-body {
   padding: 20px 24px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -143,6 +153,10 @@
 
 .review-status-pill {
   padding: 8px 10px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1.5px solid #cbd5e1;
   background-color: #ffffff;
   border-radius: 6px;
@@ -152,6 +166,8 @@
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
+  touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .review-status-pill:hover {
@@ -226,6 +242,7 @@
 
 .review-btn-cancel {
   padding: 8px 16px;
+  min-height: 38px;
   font-size: 0.875rem;
   font-weight: 600;
   color: #475569;
@@ -234,6 +251,10 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .review-btn-cancel:hover {
@@ -243,6 +264,7 @@
 
 .review-btn-save {
   padding: 8px 20px;
+  min-height: 38px;
   font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
@@ -253,7 +275,9 @@
   transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  touch-action: manipulation;
 }
 
 .review-btn-save:hover:not(:disabled) {
@@ -263,4 +287,71 @@
 .review-btn-save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ============================================================================
+   RESPONSIVE MEDIA QUERIES FOR MODAL
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .review-modal-backdrop {
+    padding: 8px;
+  }
+
+  .review-modal-content {
+    max-height: 94vh;
+    border-radius: 10px;
+  }
+
+  .review-modal-header {
+    padding: 14px 16px;
+  }
+
+  .review-modal-header h2 {
+    font-size: 1.05rem;
+  }
+
+  .review-modal-body {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .review-details-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .review-resume-box {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .review-status-pills {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .review-status-pill {
+    min-height: 42px;
+    font-size: 0.85rem;
+  }
+
+  .review-remarks-group textarea {
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+  }
+
+  .review-modal-footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .review-btn-cancel,
+  .review-btn-save {
+    width: 100%;
+    min-height: 44px;
+  }
 }

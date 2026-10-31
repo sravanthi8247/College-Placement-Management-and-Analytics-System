@@ -8,20 +8,49 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
     setDropdownOpen(false);
+    setDrawerOpen(false);
     logout();
     navigate('/login');
   };
 
-  // Close dropdown on navigation to another page
+  // Close dropdown and drawer on navigation to another page
   useEffect(() => {
     setDropdownOpen(false);
+    setDrawerOpen(false);
   }, [location.pathname]);
 
-  // Close dropdown when clicking outside or pressing Escape
+  // Lock background body scroll when mobile drawer is open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
+
+  // Close dropdown and drawer when pressing Escape or clicking outside
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setDropdownOpen(false);
+        setDrawerOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     if (!dropdownOpen) return;
 
@@ -31,20 +60,12 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
       }
     };
 
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setDropdownOpen(false);
-      }
-    };
-
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [dropdownOpen]);
 
@@ -70,22 +91,51 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
 
   return (
     <div className="cpma-dashboard">
-      <aside className="cpma-sidebar">
-        <Link to="/dashboard" className="cpma-brand">
-          <span className="cpma-brand-icon">PP</span>
-          <span className="cpma-brand-text">
-            <strong>Placement Portal</strong>
-            <small>College placements</small>
-          </span>
-        </Link>
+      {/* Mobile Drawer Backdrop */}
+      {drawerOpen && (
+        <div
+          className="cpma-drawer-backdrop"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar / Off-canvas Navigation Drawer */}
+      <aside
+        className={`cpma-sidebar ${drawerOpen ? 'open' : ''}`}
+        aria-label="Main navigation"
+      >
+        <div className="cpma-sidebar-header">
+          <Link
+            to="/dashboard"
+            className="cpma-brand"
+            onClick={() => setDrawerOpen(false)}
+          >
+            <span className="cpma-brand-icon">PP</span>
+            <span className="cpma-brand-text">
+              <strong>Placement Portal</strong>
+              <small>College placements</small>
+            </span>
+          </Link>
+
+          <button
+            type="button"
+            className="cpma-drawer-close-btn"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation drawer"
+          >
+            ✕
+          </button>
+        </div>
 
         <div className="cpma-nav-label">WORKSPACE</div>
 
-        <nav className="cpma-side-nav" aria-label="Main navigation">
+        <nav className="cpma-side-nav" aria-label="Main navigation links">
           {links.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
+              onClick={() => setDrawerOpen(false)}
               className={({ isActive }) =>
                 `cpma-nav-link${isActive ? ' active' : ''}`
               }
@@ -105,7 +155,11 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
             </div>
           </div>
 
-          <button type="button" className="cpma-logout" onClick={handleLogout}>
+          <button
+            type="button"
+            className="cpma-logout"
+            onClick={handleLogout}
+          >
             <span>↪</span> Log out
           </button>
         </div>
@@ -113,9 +167,23 @@ function AppLayout({ title, eyebrow = 'Workspace', children }) {
 
       <div className="cpma-main">
         <header className="cpma-topbar">
-          <div>
-            <div className="cpma-breadcrumb">{eyebrow}</div>
-            <h1>{title}</h1>
+          <div className="cpma-topbar-left">
+            <button
+              type="button"
+              className={`cpma-hamburger ${drawerOpen ? 'open' : ''}`}
+              onClick={() => setDrawerOpen((prev) => !prev)}
+              aria-label={drawerOpen ? 'Close navigation drawer' : 'Open navigation drawer'}
+              aria-expanded={drawerOpen}
+            >
+              <span className="cpma-hamburger-bar" />
+              <span className="cpma-hamburger-bar" />
+              <span className="cpma-hamburger-bar" />
+            </button>
+
+            <div className="cpma-topbar-titles">
+              <div className="cpma-breadcrumb">{eyebrow}</div>
+              <h1>{title}</h1>
+            </div>
           </div>
 
           <div className="cpma-user-wrapper" ref={dropdownRef}>

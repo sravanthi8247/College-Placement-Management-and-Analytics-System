@@ -1,4 +1,3 @@
-
 .companies-page {
   min-height: 100vh;
   background: #f4f7fb;
@@ -8,7 +7,9 @@
 .companies-main {
   width: min(1500px, 100%);
   margin: 0 auto;
-  padding: 32px;
+  padding: 0;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .companies-heading,
@@ -17,6 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .companies-heading {
@@ -47,7 +49,11 @@
 
 .companies-refresh,
 .companies-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 16px;
+  min-height: 40px;
   border: 1px solid #dce3ed;
   border-radius: 9px;
   background: #fff;
@@ -55,6 +61,9 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .companies-refresh:hover,
@@ -209,11 +218,12 @@
   justify-content: space-between;
   gap: 14px;
   padding: 0 24px 20px;
+  flex-wrap: wrap;
 }
 
 .companies-search {
   display: flex;
-  flex: 1 1 auto;
+  flex: 1 1 240px;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -223,6 +233,7 @@
   border-radius: 9px;
   background: #fbfcfe;
   color: #8290a5;
+  box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -253,7 +264,7 @@
 
 .companies-status-filter {
   width: 170px;
-  min-width: 160px;
+  min-width: 150px;
   max-width: 180px;
   flex: 0 0 170px;
   height: 42px;
@@ -266,6 +277,7 @@
   font: inherit;
   font-size: 13.5px;
   font-weight: 500;
+  box-sizing: border-box;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -292,6 +304,7 @@
 
 .companies-retry-btn {
   padding: 6px 14px;
+  min-height: 34px;
   border: 1px solid #f87171;
   border-radius: 7px;
   background: #fff;
@@ -300,6 +313,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  touch-action: manipulation;
 }
 
 .companies-retry-btn:hover {
@@ -308,11 +322,16 @@
 
 .companies-table-scroll {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .companies-table {
   width: 100%;
+  min-width: 1100px;
   border-collapse: collapse;
   text-align: left;
   white-space: nowrap;
@@ -383,20 +402,27 @@
 }
 
 .companies-actions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 7px;
 }
 
 .companies-edit-btn,
 .companies-delete-btn {
-  padding: 7px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 10px;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
 }
 
 .companies-edit-btn {
@@ -495,23 +521,29 @@
   text-align: center;
 }
 
-@media (max-width: 1150px) {
-  .companies-main {
-    padding: 24px;
-  }
+/* ============================================================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================================================ */
 
+/* Tablet & Medium Screens (769px - 1024px) */
+@media (max-width: 1024px) {
   .companies-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .companies-toolbar {
+    gap: 10px;
   }
 }
 
+/* Phablets & Small Tablets (481px - 768px) */
 @media (max-width: 768px) {
-  .companies-main {
-    padding: 18px 12px;
-  }
-
   .companies-heading {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
   .companies-heading h1 {
@@ -519,65 +551,86 @@
   }
 
   .companies-subtitle {
-    font-size: 12px;
+    font-size: 13px;
   }
 
-  .companies-refresh {
-    padding: 9px;
-    font-size: 11px;
-  }
-
-  .companies-stats {
-    gap: 10px;
-  }
-
-  .companies-stat-card {
+  .companies-section-heading {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    padding: 15px 11px;
+    gap: 12px;
   }
 
-  .companies-stat-icon {
-    flex-basis: 34px;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    font-size: 16px;
-  }
-
-  .companies-stat-card h2 {
-    font-size: 22px;
-  }
-
-  .companies-stat-card p {
-    font-size: 11px;
-  }
-
-  .companies-stat-card span {
-    font-size: 10px;
-  }
-
-  .companies-form-panel {
-    padding: 16px;
+  .companies-section-heading .companies-cancel {
+    align-self: flex-start;
   }
 
   .companies-table-title {
-    padding: 18px 16px;
+    padding: 18px 16px 14px;
   }
 
   .companies-toolbar {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
     padding: 0 16px 16px;
   }
 
+  .companies-search {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
   .companies-status-filter {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 100%;
   }
 
   .companies-table th:first-child,
   .companies-table td:first-child {
     padding-left: 16px;
+  }
+}
+
+/* Mobile Smartphones (320px - 480px) */
+@media (max-width: 480px) {
+  .companies-heading h1 {
+    font-size: 21px;
+  }
+
+  .companies-subtitle {
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .companies-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .companies-stat-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .companies-stat-card h2 {
+    font-size: 24px;
+  }
+
+  .companies-form-panel {
+    padding: 16px 12px;
+  }
+
+  .companies-toolbar {
+    padding: 0 12px 14px;
+    gap: 10px;
+  }
+
+  .companies-edit-btn,
+  .companies-delete-btn {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: 11.5px;
   }
 }
